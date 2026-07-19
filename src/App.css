@@ -374,10 +374,10 @@
 
 .shot-target-box {
   position: absolute;
-  left: 34%;
-  top: 25%;
-  width: 32%;
-  height: 47%;
+  left: 33.25%;
+  top: 24.15%;
+  width: 33.5%;
+  height: 48%;
   border: 2px dashed rgba(255, 248, 190, 0.9);
   border-radius: 8px;
   background: rgba(255, 247, 183, 0.08);

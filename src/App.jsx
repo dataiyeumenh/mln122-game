@@ -2,7 +2,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import ballImg from "./assets/ball.png";
 import fieldBgImg from "./assets/goal-background.jpg";
 import keeperLeftImg from "./assets/left.png";
+import keeperLeftLowImg from "./assets/left-low.png";
+import keeperMiddleHighImg from "./assets/middle-high.png";
+import keeperMiddleLowImg from "./assets/middle-low.png";
 import keeperRightImg from "./assets/right.png";
+import keeperRightLowImg from "./assets/right-low.png";
 import keeperStandImg from "./assets/stand.png";
 import { QUESTION_SECONDS } from "./config/game";
 import { ANSWER_LABELS, QUESTIONS } from "./data/questions";
@@ -15,6 +19,7 @@ import "./App.css";
 
 const MATCH_SECONDS = 7 * 60;
 const GAME_STATE_KEY = "penalty_quiz_live_state_v1";
+const KEEPER_ZONES = ["left", "middle", "right"];
 
 function clampNumber(value, min, max) {
   const numeric = Number(value);
@@ -89,11 +94,13 @@ function loadPersistedState() {
           ? saved.feedbackType
           : "neutral",
       goalkeeperPose:
-        saved.goalkeeperPose === "left" || saved.goalkeeperPose === "right"
+        KEEPER_ZONES.includes(saved.goalkeeperPose)
           ? saved.goalkeeperPose
           : "stand",
       keeperLean:
-        saved.keeperLean === "low-left" || saved.keeperLean === "low-right"
+        saved.keeperLean === "low-left" ||
+        saved.keeperLean === "low-middle" ||
+        saved.keeperLean === "low-right"
           ? saved.keeperLean
           : "",
       ballFlight:
@@ -204,10 +211,18 @@ function App() {
 
   const keeperImage =
     goalkeeperPose === "left"
-      ? keeperLeftImg
-      : goalkeeperPose === "right"
-        ? keeperRightImg
-        : keeperStandImg;
+      ? keeperLean === "low-left"
+        ? keeperLeftLowImg
+        : keeperLeftImg
+      : goalkeeperPose === "middle"
+        ? keeperLean === "low-middle"
+          ? keeperMiddleLowImg
+          : keeperMiddleHighImg
+        : goalkeeperPose === "right"
+          ? keeperLean === "low-right"
+            ? keeperRightLowImg
+            : keeperRightImg
+          : keeperStandImg;
 
   const resetRoundVisual = () => {
     setGoalkeeperPose("stand");
@@ -591,8 +606,15 @@ function App() {
       return;
     }
 
+    const shotX = event.clientX - goalRect.left;
+    const leftBoundary = goalRect.width / 3;
+    const rightBoundary = (goalRect.width * 2) / 3;
     const shotSide =
-      event.clientX < goalRect.left + goalRect.width / 2 ? "left" : "right";
+      shotX < leftBoundary
+        ? "left"
+        : shotX > rightBoundary
+          ? "right"
+          : "middle";
     const isLowShot = event.clientY > goalRect.top + goalRect.height * 0.62;
     const nextAnswered = answeredCount + 1;
 
@@ -620,15 +642,12 @@ function App() {
       return;
     }
 
-    const keeperDive = Math.random() < 0.5 ? "left" : "right";
-    const keeperDivesLowLeft = keeperDive === "left" && isLowShot;
-    const keeperDivesLowRight = keeperDive === "right" && isLowShot;
+    const keeperDive =
+      KEEPER_ZONES[Math.floor(Math.random() * KEEPER_ZONES.length)];
     const isSaved = keeperDive === shotSide;
 
     setGoalkeeperPose(keeperDive);
-    setKeeperLean(
-      keeperDivesLowLeft ? "low-left" : keeperDivesLowRight ? "low-right" : "",
-    );
+    setKeeperLean(isLowShot ? `low-${keeperDive}` : "");
 
     if (isSaved) {
       animateBallToClick(event.clientX, event.clientY, "miss");
