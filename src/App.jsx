@@ -93,10 +93,9 @@ function loadPersistedState() {
         saved.feedbackType === "timeout"
           ? saved.feedbackType
           : "neutral",
-      goalkeeperPose:
-        KEEPER_ZONES.includes(saved.goalkeeperPose)
-          ? saved.goalkeeperPose
-          : "stand",
+      goalkeeperPose: KEEPER_ZONES.includes(saved.goalkeeperPose)
+        ? saved.goalkeeperPose
+        : "stand",
       keeperLean:
         saved.keeperLean === "low-left" ||
         saved.keeperLean === "low-middle" ||
@@ -787,7 +786,7 @@ function App() {
                     maxLength={24}
                     value={inputName}
                     onChange={(event) => setInputName(event.target.value)}
-                    placeholder="Ví dụ: Hoang"
+                    placeholder="Ví dụ: Hoàng"
                     required
                     autoFocus
                   />
